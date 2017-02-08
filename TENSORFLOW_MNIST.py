@@ -9,7 +9,7 @@ import numpy as np
 
 DROPOUT=0.5
 
-TRAINING_ITERATIONS =200
+TRAINING_ITERATIONS =1000
 LEARNING_RATE = 1e-4
 Validation_size=1000
 BATCH_SIZE=50
@@ -179,13 +179,13 @@ sess = tf.InteractiveSession()
 saver = tf.train.Saver()
 
 
-# In[11]:
+# In[13]:
 
 check=input('Enter do you wanna load file or run a new model');
 if check=='yes' or check=='YES':
     LOAD_FILE=input("Enter the name of the model to load the tensorflow model");
     try:
-        new_saver.restore(sess, LOAD_FILE)
+        saver.restore(sess, LOAD_FILE)
     except :
         print('File Do not exist')
 else:
@@ -194,7 +194,7 @@ else:
 # evaluation
 
 
-# In[12]:
+# In[14]:
 
 # visualisation variables
 train_accuracies = []
