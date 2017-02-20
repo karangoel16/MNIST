@@ -34,56 +34,64 @@ def gaussian_noise_layer(input_layer, std):
 
 # In[3]:
 
-LOAD_FILE=input("Enter the name of the model to load the tensorflow model");
 test=pd.read_csv('~/Documents/GIT_HUB/MNIST/test.csv').values
 test=test.astype(np.float);
 test=np.multiply(test,1.0/255.0);
 std=tf.placeholder('float')
-x = gaussian_noise_layer(tf.placeholder('float', shape=[None, image_size]),std);
+keep_prob1=tf.placeholder('float')
+keep_prob=tf.placeholder('float')
+x = tf.placeholder('float', shape=[None, image_size]);
 #W=tf.placeholder('float',shape=[images.shape[1],10])
 y_=tf.placeholder('float',shape=[None,label])
 W_conv1 = w_variable([5, 5, 1, 32])
 b_conv1 = b_variable([32])
 image = tf.reshape(x, [-1,image_width , image_height,1])
+graph = tf.get_default_graph()
 h_conv1 = tf.nn.relu(conv2d(image, W_conv1) + b_conv1)
 h_pool1 = mpool(h_conv1)
+#h_pool1 = tf.nn.dropout(h_pool1,keep_prob1);
+# second convolutional layer
 W_conv2 = w_variable([5, 5, 32, 64])
 b_conv2 = b_variable([64])
 h_conv2 = tf.nn.relu(conv2d(h_pool1, W_conv2) + b_conv2)
 h_pool2 = mpool(h_conv2)
+W_conv3=w_variable([1,1,64,64])
+b_conv3=b_variable([64])
+h_pool2=tf.nn.relu(conv2d(h_pool2,W_conv3)+b_conv3);
+#h_pool2 = tf.nn.dropout(h_pool2,keep_prob1);
 W_fc1 = w_variable([7 * 7 * 64, 1024])
 b_fc1 = b_variable([1024])
 h_pool2_flat = tf.reshape(h_pool2, [-1, 7*7*64])
 h_fc1 = tf.nn.relu(tf.matmul(h_pool2_flat, W_fc1) + b_fc1)
-keep_prob = tf.placeholder('float')
 h_fc1_drop = tf.nn.dropout(h_fc1, keep_prob)
 #this is the output layer
 W_fc2 = w_variable([1024, label])
 b_fc2 = b_variable([label])
 y = tf.nn.softmax(tf.matmul(h_fc1_drop, W_fc2) + b_fc2)
-cross_entropy = -tf.reduce_sum(y_*tf.log(y))
 # optimisation function
 cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y_, logits=y))
 train_step = tf.train.AdamOptimizer(LEARNING_RATE).minimize(cross_entropy)
 correct_prediction = tf.equal(tf.argmax(y,1), tf.argmax(y_,1))
 accuracy = tf.reduce_mean(tf.cast(correct_prediction, 'float'))
 predict = tf.argmax(y,1)
+init = tf.initialize_all_variables()
 sess = tf.InteractiveSession()
 saver = tf.train.Saver()
-init = tf.initialize_all_variables()
 
 
-# In[4]:
+# In[5]:
 
 try:
     with tf.Session() as sess:
+        LOAD_FILE=input("Enter the name of the model to load the tensorflow model");
+        SAVE_FILE=input("Enter the name of csv file that you want to save");
         saver = tf.train.import_meta_graph(LOAD_FILE+'.meta');
         saver.restore(sess,LOAD_FILE)
         predicted_values=np.zeros(shape=(test.shape[0]));
         for i in range(0,test.shape[0]//BATCH_SIZE):
-            predicted_values[i*(BATCH_SIZE):(i+1)*BATCH_SIZE]=predict.eval(feed_dict={x:test[(i*BATCH_SIZE):(i+1)*BATCH_SIZE],keep_prob:1.0});
+            predicted_values[i*(BATCH_SIZE):(i+1)*BATCH_SIZE]=predict.eval(feed_dict={x:test[(i*BATCH_SIZE):(i+1)*BATCH_SIZE],keep_prob:1.0,keep_prob1:1.0,keep_prob:1.0});
         print(predicted_values[10])
-    np.savetxt('submission.csv', 
+    np.savetxt(SAVE_FILE+".csv", 
                np.c_[range(1,len(test)+1),predicted_values], 
                delimiter=',', 
                header = 'ImageId,Label', 
