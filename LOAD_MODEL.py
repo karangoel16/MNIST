@@ -79,7 +79,7 @@ sess = tf.InteractiveSession()
 saver = tf.train.Saver()
 
 
-# In[5]:
+# In[4]:
 
 try:
     with tf.Session() as sess:
@@ -89,7 +89,7 @@ try:
         saver.restore(sess,LOAD_FILE)
         predicted_values=np.zeros(shape=(test.shape[0]));
         for i in range(0,test.shape[0]//BATCH_SIZE):
-            predicted_values[i*(BATCH_SIZE):(i+1)*BATCH_SIZE]=predict.eval(feed_dict={x:test[(i*BATCH_SIZE):(i+1)*BATCH_SIZE],keep_prob:1.0,keep_prob1:1.0,keep_prob:1.0});
+            predicted_values[i*(BATCH_SIZE):(i+1)*BATCH_SIZE]=predict.eval(feed_dict={x:test[(i*BATCH_SIZE):(i+1)*BATCH_SIZE],keep_prob:1.0});
         print(predicted_values[10])
     np.savetxt(SAVE_FILE+".csv", 
                np.c_[range(1,len(test)+1),predicted_values], 

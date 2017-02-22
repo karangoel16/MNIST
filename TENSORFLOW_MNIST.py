@@ -5,7 +5,7 @@
 # https://github.com/uosdmlab/tensorflow-tutorial/blob/master/notebooks/4.MNIST%20with%20CNN.ipynb
 # https://www.kaggle.com/innerproduct/state-farm-distracted-driver-detection/tensorflow
 
-# In[1]:
+# In[2]:
 
 import pandas as pd
 import tensorflow as tf
@@ -18,12 +18,12 @@ Validation_size=1000
 BATCH_SIZE=50
 
 
-# In[2]:
+# In[3]:
 
 data=pd.read_csv('~/Documents/GIT_HUB/MNIST/train.csv')
 
 
-# In[3]:
+# In[4]:
 
 images=data.iloc[:,1:].values.astype(np.float);
 images=np.multiply(images,1.0/255.0);
@@ -32,13 +32,13 @@ image_size=images.shape[1]
 image_width = image_height = np.ceil(np.sqrt(image_size)).astype(np.uint8)
 
 
-# In[4]:
+# In[5]:
 
 labels_count=data[[0]].values.ravel()
 label = np.unique(labels_count).shape[0]
 
 
-# In[5]:
+# In[6]:
 
 def dense(labels_dense, num_classes):
     num_labels = labels_dense.shape[0]
@@ -51,7 +51,7 @@ hot_label=dense(labels_count,label);
 hot_label = hot_label.astype(np.uint8)
 
 
-# In[6]:
+# In[7]:
 
 validation_images=images[:Validation_size]
 validation_labels=hot_label[:Validation_size]
@@ -62,7 +62,7 @@ train_labels=hot_label[Validation_size:]
 # Added guassian layer to increase the number of samples , by adding another layer we were able to generate more number of training samples.
 # 
 
-# In[7]:
+# In[8]:
 
 # weight initialization
 def w_variable(shape):
@@ -80,7 +80,7 @@ def gaussian_noise_layer(input_layer, std):
     return input_layer + noise
 
 
-# In[8]:
+# In[9]:
 
 epochs_completed = 0
 index_in_epoch = 0
@@ -110,7 +110,7 @@ def next_batch(batch_size):
     return train_images[start:end], train_labels[start:end]
 
 
-# In[9]:
+# In[10]:
 
 std=tf.placeholder('float');
 x = tf.placeholder('float', shape=[None, image_size]);
@@ -121,7 +121,7 @@ keep_prob = tf.placeholder('float')
 keep_prob1 = tf.placeholder('float')
 
 
-# In[10]:
+# In[11]:
 
 W_conv1 = w_variable([5, 5, 1, 32])
 b_conv1 = b_variable([32])
@@ -166,9 +166,9 @@ sess = tf.InteractiveSession()
 saver = tf.train.Saver()
 
 
-# In[11]:
+# In[12]:
 
-check=input('Enter do you wanna load file or run a new model');
+check=input('Enter do you wanna load file or run a new model(yes/no)');
 if check=='yes' or check=='YES':
     LOAD_FILE=input("Enter the name of the model to load the tensorflow model");
     try:
@@ -182,7 +182,7 @@ else:
 # evaluation
 
 
-# In[12]:
+# In[14]:
 
 # visualisation variables
 train_accuracies = []
@@ -193,12 +193,12 @@ for i in range(TRAINING_ITERATIONS):
     #get new batch
     batch_xs, batch_ys = next_batch(50) 
     if(i%100==0):
-        print(i)
+        print("step:"+str(i))
         if(Validation_size):#this is done to make sure that in case we make validation size 0 , we can simply avoid printing it
             validation_accuracies.append(sess.run(accuracy,feed_dict={x:validation_images,y_:validation_labels,keep_prob:1.0,std:0.0,train_:0}));
             train_accuracies.append((sess.run(accuracy,feed_dict={x:batch_xs,y_:batch_ys,keep_prob:1.0,std:0.0,train_:0})));
-            print(validation_accuracies[len(validation_accuracies)-1]);   
-    sess.run(train_step, feed_dict={x: batch_xs, y_: batch_ys, keep_prob: DROPOUT,std:0.0,train_:1})
+            print("Validation Accuracy:"+str(validation_accuracies[len(validation_accuracies)-1]));   
+    sess.run(train_step, feed_dict={x: batch_xs, y_: batch_ys, keep_prob: DROPOUT,std:0.001,train_:1})
 if check=='Yes' or check=='yes':
     check_1=input("Do you want to save file with same name or not?(yes/No)");
     if(check_1=='no'):
@@ -210,7 +210,7 @@ else:
     saver.save(sess, SAVING_FILE);#this is where we save our training model which can be used later
 
 
-# In[13]:
+# In[ ]:
 
 print(validation_accuracies[len(validation_accuracies)-1]);
 line1=plt.plot(train_accuracies,label='Training Value')
